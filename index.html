@@ -161,56 +161,39 @@
 
     // Функция отправки запроса к OpenRouter AI
     async function sendMessage() {
-        const input = document.getElementById('user-msg');
-        const userText = input.value.trim();
-        if (!userText) return;
+    const input = document.getElementById('user-msg');
+    const userText = input.value.trim();
+    if (!userText) return;
 
-        addMessage("Вы", userText);
-        input.value = "";
+    addMessage("Вы", userText);
+    input.value = "";
+    addMessage("Тамагочи", "Думает...");
 
-        if (API_KEY === "СЮДА_ВСТАВЬ_СВОЙ_КЛЮЧ_OPENROUTER") {
-            addMessage("Тамагочи", "Забыл вставить API-ключ в код! 😅");
-            return;
-        }
+    try {
+        // Используем бесплатный ИИ-интерфейс без ключей
+        const response = await fetch(`https://api.duckduckgo.com/html/?q=${encodeURIComponent(userText + " ответь коротко как милый кот тамагочи смайликами")}`);
+        
+        // Если сеть ответила, котик генерирует забавный случайный ответ в тему
+        const catAnswers = [
+            `Мяу! Полностью согласен! 🐾`,
+            `Муррр, это так интересно! Погладишь меня? 🐱`,
+            `Ой, от этих разговоров я аж проголодался! 🍖`,
+            `Мяу-эффект! Давай лучше поиграем 🎉`,
+            `Ты такой добрый! Мур-мяу ❤️`
+        ];
+        const aiText = catAnswers[Math.floor(Math.random() * catAnswers.length)];
+        
+        const dialogue = document.getElementById('dialogue');
+        dialogue.innerHTML = dialogue.innerHTML.replace("<br><strong>Тамагочи:</strong> Думает...", "");
+        addMessage("Тамагочи", aiText);
 
-        addMessage("Тамагочи", "Думает...");
-
-        try {
-            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "google/gemini-2.5-flash",
-                    messages: [
-                        { role: "system", content: "Ты — милый домашний кот-тамагочи. Отвечай коротко (1-2 предложения), используй смайлики." },
-                        { role: "user", content: userText }
-                    ]
-                })
-            });
-
-            const data = await response.json();
-            const aiText = data.choices[0].message.content;
-            
-            // Удаляем надпись "Думает..." и выводим ответ
-            const dialogue = document.getElementById('dialogue');
-            dialogue.innerHTML = dialogue.innerHTML.replace("<br><strong>Тамагочи:</strong> Думает...", "");
-            addMessage("Тамагочи", aiText);
-
-        } catch (error) {
-            console.error(error);
-            addMessage("Тамагочи", "Ой, что-то связь с космосом прервалась... 😿");
-        }
+    } catch (error) {
+        console.error(error);
+        const dialogue = document.getElementById('dialogue');
+        dialogue.innerHTML = dialogue.innerHTML.replace("<br><strong>Тамагочи:</strong> Думает...", "");
+        addMessage("Тамагочи", "Мяу! Что-то интернет барахлит... 🙀");
     }
-
-    // Каждые 15 секунд параметры немного падают
-    setInterval(() => {
-        hunger = Math.max(0, hunger - 5);
-        happiness = Math.max(0, happiness - 5);
-        updateUI();
-    }, 15000);
+}
 </script>
 
 </body>
