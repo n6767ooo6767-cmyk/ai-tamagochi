@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Тамагочи 🐾</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 400px;
+            text-align: center;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+        }
+        .stat-box {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .pet-avatar {
+            font-size: 80px;
+            margin: 20px 0;
+            transition: transform 0.3s;
+        }
+        .pet-avatar:active {
+            transform: scale(1.2);
+        }
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-feed { background: #ffccd5; color: #ff4d6d; }
+        .btn-play { background: #ccffdd; color: #00b4d8; }
+        .btn-chat { background: #e2e2e2; grid-column: span 2; }
+        button:hover { opacity: 0.9; }
+        .chat-section {
+            border-top: 2px solid #eee;
+            padding-top: 15px;
+        }
+        .dialogue-box {
+            height: 100px;
+            overflow-y: auto;
+            background: #f1f3f5;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .input-area {
+            display: flex;
+            gap: 5px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h2>Мой AI Тамагочи 🐾</h2>
+    
+    <div class="stats">
+        <div class="stat-box">🍖 Сытость: <span id="hunger">100</span>%</div>
+        <div class="stat-box">🎉 Радость: <span id="happiness">100</span>%</div>
+    </div>
+
+    <div class="pet-avatar" id="pet">🐱</div>
+    <div id="status-text" style="font-style: italic; color: #666; margin-bottom: 20px;">Я отлично себя чувствую!</div>
+
+    <div class="actions">
+        <button class="btn-feed" onclick="feedPet()">Покормить 🍖</button>
+        <button class="btn-play" onclick="playWithPet()">Поиграть 🎉</button>
+    </div>
+
+    <div class="chat-section">
+        <div class="dialogue-box" id="dialogue">
+            <strong>Тамагочи:</strong> Привет! Напиши мне что-нибудь, и я отвечу тебе с помощью ИИ!
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-msg" placeholder="Поговори со мной...">
+            <button class="btn-chat" onclick="sendMessage()" style="grid-column: auto; width: 80px;">👉</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Параметры питомца
+    let hunger = 100;
+    let happiness = 100;
+    
+    // Ключ OpenRouter (ВАЖНО: В реальных проектах ключ прячут на сервере. 
+    // Для тестов на GitHub Pages вставляйте его сюда, но помните, что в публичном репозитории его могут увидеть)
+    const API_KEY = "СЮДА_ВСТАВЬ_СВОЙ_КЛЮЧ_OPENROUTER"; 
+
+    function updateUI() {
+        document.getElementById('hunger').innerText = hunger;
+        document.getElementById('happiness').innerText = happiness;
+
+        const pet = document.getElementById('pet');
+        if (hunger < 30 || happiness < 30) {
+            pet.innerText = "😿";
+            document.getElementById('status-text').innerText = "Мне плохо... Позаботься обо мне!";
+        } else if (hunger > 80 && happiness > 80) {
+            pet.innerText = "😸";
+            document.getElementById('status-text').innerText = "Я счастлив!";
+        } else {
+            pet.innerText = "🐱";
+            document.getElementById('status-text').innerText = "Всё в порядке.";
+        }
+    }
+
+    function feedPet() {
+        hunger = Math.min(100, hunger + 15);
+        updateUI();
+        addMessage("Вы", "Покормил питомца 🍖");
+    }
+
+    function playWithPet() {
+        happiness = Math.min(100, happiness + 20);
+        updateUI();
+        addMessage("Вы", "Поиграл с питомцем 🎉");
+    }
+
+    function addMessage(author, text) {
+        const dialogue = document.getElementById('dialogue');
+        dialogue.innerHTML += `<br><strong>${author}:</strong> ${text}`;
+        dialogue.scrollTop = dialogue.scrollHeight;
+    }
+
+    // Функция отправки запроса к OpenRouter AI
+    async function sendMessage() {
+        const input = document.getElementById('user-msg');
+        const userText = input.value.trim();
+        if (!userText) return;
+
+        addMessage("Вы", userText);
+        input.value = "";
+
+        if (API_KEY === "СЮДА_ВСТАВЬ_СВОЙ_КЛЮЧ_OPENROUTER") {
+            addMessage("Тамагочи", "Забыл вставить API-ключ в код! 😅");
+            return;
+        }
+
+        addMessage("Тамагочи", "Думает...");
+
+        try {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "google/gemini-2.5-flash",
+                    messages: [
+                        { role: "system", content: "Ты — милый домашний кот-тамагочи. Отвечай коротко (1-2 предложения), используй смайлики." },
+                        { role: "user", content: userText }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            const aiText = data.choices[0].message.content;
+            
+            // Удаляем надпись "Думает..." и выводим ответ
+            const dialogue = document.getElementById('dialogue');
+            dialogue.innerHTML = dialogue.innerHTML.replace("<br><strong>Тамагочи:</strong> Думает...", "");
+            addMessage("Тамагочи", aiText);
+
+        } catch (error) {
+            console.error(error);
+            addMessage("Тамагочи", "Ой, что-то связь с космосом прервалась... 😿");
+        }
+    }
+
+    // Каждые 15 секунд параметры немного падают
+    setInterval(() => {
+        hunger = Math.max(0, hunger - 5);
+        happiness = Math.max(0, happiness - 5);
+        updateUI();
+    }, 15000);
+</script>
+
+</body>
+</html>
