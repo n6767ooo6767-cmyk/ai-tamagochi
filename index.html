@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Тамагочи: Полная Версия 🐾</title>
+    <title>AI Тамагочи: Мега-Версия 🐾</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -96,7 +96,7 @@
             margin-top: 15px;
         }
         .dialogue-box {
-            height: 90px;
+            height: 110px;
             overflow-y: auto;
             background: #212529;
             color: #f8f9fa;
@@ -170,7 +170,7 @@
 </div>
 
 <script>
-    // Состояние игры (как в Python)
+    // Состояние игры (как в Python!)
     let hunger = 100;
     let happiness = 100;
     let health = 100;
@@ -183,27 +183,23 @@
     };
 
     function updateUI() {
-        // Обновляем цифры
         document.getElementById('hunger').innerText = hunger;
         document.getElementById('happiness').innerText = happiness;
         document.getElementById('health').innerText = health;
         document.getElementById('energy').innerText = energy;
         document.getElementById('money').innerText = money;
         
-        // Обновляем рюкзак
         document.getElementById('inventory-text').innerText = `🍖 Рыбов: ${inventory.food} шт. | 💊 Лекарство: ${inventory.med} шт.`;
         
-        // Блокировка кнопок вещей, если их 0
         document.getElementById('use-food').disabled = inventory.food <= 0;
         document.getElementById('use-med').disabled = inventory.med <= 0;
 
-        // Состояние аватара
         const pet = document.getElementById('pet');
         const status = document.getElementById('status-text');
         
         if (health <= 0) {
             pet.innerText = "🪦";
-            status.innerText = "Тамагочи погиб... Нажмите рефреш страницы, чтобы начать заново.";
+            status.innerText = "Тамагочи погиб... Перезагрузи страницу, чтобы начать заново.";
             return;
         }
         
@@ -212,7 +208,7 @@
             status.innerText = "Я сильно болею, мне нужно лекарство!";
         } else if (energy < 30) {
             pet.innerText = "🥱";
-            status.innerText = "Я хочу спать... Отправь меня в кровать.";
+            status.innerText = "Я хочу спать... Уложи меня в кровать.";
         } else if (hunger < 40 || happiness < 40) {
             pet.innerText = "😿";
             status.innerText = "Мне грустно или я хочу кушать...";
@@ -227,6 +223,7 @@
             addMessage("Тамагочи", "Я слишком устал, чтобы играть... 🥱");
             return;
         }
+        if (health <= 0) return;
         happiness = Math.min(100, happiness + 15);
         energy = Math.max(0, energy - 20);
         money += 15;
@@ -235,6 +232,7 @@
     }
 
     function sleepPet() {
+        if (health <= 0) return;
         energy = Math.min(100, energy + 40);
         hunger = Math.max(0, hunger - 10);
         addMessage("Вы", "Уложили котика спать 💤 Энергия восстановлена!");
@@ -242,6 +240,7 @@
     }
 
     function buyItem(type, cost) {
+        if (health <= 0) return;
         if (money < cost) {
             addMessage("Система", "Не хватает монет! 💰");
             return;
@@ -253,7 +252,7 @@
     }
 
     function useItem(type) {
-        if (inventory[type] <= 0) return;
+        if (inventory[type] <= 0 || health <= 0) return;
         
         inventory[type]--;
         if (type === 'food') {
@@ -272,33 +271,55 @@
         dialogue.scrollTop = dialogue.scrollHeight;
     }
 
-    // Чат-ответы ИИ без ключа
+    // Умный контекстный чат без лагов
     async function sendMessage() {
         const input = document.getElementById('user-msg');
-        const userText = input.value.trim();
+        const userText = input.value.trim().toLowerCase();
         if (!userText) return;
 
-        addMessage("Вы", userText);
+        addMessage("Вы", input.value);
         input.value = "";
         addMessage("Тамагочи", "Думает...");
 
         setTimeout(() => {
-            const catAnswers = [
-                `Мяу! Полностью согласен! 🐾`,
-                `Муррр, это так здорово! Дай рыбку? 🍖`,
-                `Ой, от этих разговоров я аж проголодался!`,
-                `Мяу! Ты лучший хозяин! ❤️`,
-                `Мяу-эффект! Нам нужно больше золота 💰`
-            ];
-            const aiText = catAnswers[Math.floor(Math.random() * catAnswers.length)];
+            let aiText = "";
+            
+            // Логика подбора реплик на основе ввода
+            if (userText.includes("привет") || userText.includes("ку") || userText.includes("здравствуй")) {
+                const приветы = ["Мяу! Приветики! Ты принес мне рыбов? 🐟", "Муррр! Привет, хозяин! 🐾", "Мяу! Наконец-то ты пришел! Давай играть! 🎉"];
+                aiText = приветы[Math.floor(Math.random() * приветы.length)];
+            } else if (userText.includes("дел") || userText.includes("как ты")) {
+                if (hunger < 50) {
+                    aiText = "Живот урчит... Мысли только о рыбке 🍖😿";
+                } else if (energy < 40) {
+                    aiText = "Глазки слипаются... Отправь меня поспать 🥱💤";
+                } else {
+                    aiText = "Все просто супермурчательно! Мяу! 🥰";
+                }
+            } else if (userText.includes("кушать") || userText.includes("рыб") || userText.includes("еда")) {
+                aiText = inventory.food > 0 ? "О, у нас же есть рыбка в рюкзаке! Покорми меня скорее! 🍖" : "Рыба закончилась! Загляни в магазин за покупками 💰";
+            } else if (userText.includes("кто ты") || userText.includes("зовут")) {
+                aiText = "Я твой верный виртуальный кот-тамагочи! Напиши мой код на Python или играй прямо здесь! 💻🐾";
+            } else if (userText.includes("дурак") || userText.includes("плохой")) {
+                aiText = "Ну зачем ты так... Я же просто котик 😿 Купи мне рыбку в знак примирения?";
+            } else {
+                // Если котик не понял фразу, он отвечает случайным забавным фактом
+                const дефолт = [
+                    "Мяу! Это очень интересно, но давай лучше поиграем и заработаем монет? 💰",
+                    "Муррр... Человеческий язык такой сложный! Почеши за ушком? 🐱",
+                    "Мяу-эффект! Кстати, ты знал, что котики спят по 16 часов в сутки? Я тоже хочу! 💤",
+                    "Ты самый лучший хозяин в мире! Мяу! ❤️"
+                ];
+                aiText = дефолт[Math.floor(Math.random() * дефолт.length)];
+            }
             
             const dialogue = document.getElementById('dialogue');
             dialogue.innerHTML = dialogue.innerHTML.replace("<br><strong>Тамагочи:</strong> Думает...", "");
             addMessage("Тамагочи", aiText);
-        }, 600);
+        }, 500);
     }
 
-    // Каждые 15 секунд параметры падают (как тики в Python)
+    // Каждые 15 секунд параметры падают (Тики игры)
     setInterval(() => {
         if (health <= 0) return;
         
@@ -312,7 +333,6 @@
         updateUI();
     }, 15000);
 
-    // Первичный запуск интерфейса
     updateUI();
 </script>
 
